@@ -1,11 +1,18 @@
 
 public class Board {
-
+	
+	//Length of side of game board
+	private int dimension;
+	private int[][] blocks;
+	private int[]emptyBlock;
+	
 	public Board(int[][] blocks) {
+		dimension = blocks.length;
+		initializeBlocks(blocks);
 	}
 
 	public int dimension() {
-		return 0;
+		return dimension;
 	}
 
 	public int hamming() {
@@ -34,6 +41,9 @@ public class Board {
 	}
 
 	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		builder.append(dimension).append("\n");
+		
 		return null;
 		
 	}
@@ -42,4 +52,16 @@ public class Board {
 		
 	}
 
+	public void initializeBlocks(int[][] blocks){
+		for(int i = 0; i < dimension; i++){
+			for(int j = 0; j < dimension; j++){
+				this.blocks[i][j] = blocks[i][j];
+				
+				if (this.blocks[i][j] == 0){
+					emptyBlock[0] = i;
+					emptyBlock[1] = j;
+				}
+			}
+		}
+	}
 }
