@@ -1,7 +1,11 @@
 
 public class Solver {
 	public Solver(Board initial){
-		
+		if(initial == null){
+			throw new java.lang.NullPointerException();
+		} else {
+			
+		}
 	}
 	
 	public boolean isSolvable(){

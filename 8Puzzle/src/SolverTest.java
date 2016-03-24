@@ -18,9 +18,9 @@ public class SolverTest {
 	    Solver solver = new Solver(initial);
 
 	    // print solution to standard output
-	    if (!solver.isSolvable())
+	    if (!solver.isSolvable()){
 	        StdOut.println("No solution possible");
-	    else {
+	    } else {
 	        StdOut.println("Minimum number of moves = " + solver.moves());
 	        for (Board board : solver.solution())
 	            StdOut.println(board);
