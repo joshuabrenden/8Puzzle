@@ -139,6 +139,7 @@ public class Board {
 
 	private void initializeBlocks(int[][] newBlocks) {
 		blocks = new int[dimension][dimension];
+		emptyBlock = new int[2];
 		for (int column = 0; column < dimension; column++) {
 			for (int row = 0; row < dimension; row++) {
 				blocks[column][row] = newBlocks[column][row];
