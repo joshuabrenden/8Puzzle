@@ -1,3 +1,5 @@
+import java.util.Arrays;
+import java.util.LinkedList;
 
 public class Board {
 
@@ -7,7 +9,7 @@ public class Board {
 	// Game board
 	private int[][] blocks;
 
-	// Empty block in game board
+	// Empty block in game board, 0 index is row, 1 index is column
 	private int[] emptyBlock;
 
 	/*
@@ -33,15 +35,15 @@ public class Board {
 	 */
 	public int hamming() {
 		int count = 0;
-		
-		for(int column = 0; column < dimension; column++){
-			for(int row = 0; row < dimension; row++){
-				if(isBlockInPlace(row, column)){
+
+		for (int column = 0; column < dimension; column++) {
+			for (int row = 0; row < dimension; row++) {
+				if (isBlockInPlace(row, column)) {
 					count++;
 				}
 			}
 		}
-		
+
 		return count;
 	}
 
@@ -54,121 +56,177 @@ public class Board {
 	public int manhattan() {
 		int count = 0;
 
-		for(int column = 0; column < dimension; column++){
-			for(int row = 0; row < dimension; row++){
-					count += getDistance(row, column);
-				}
+		for (int column = 0; column < dimension; column++) {
+			for (int row = 0; row < dimension; row++) {
+				count += getDistance(row, column);
 			}
-		
+		}
+
 		return count;
 	}
 
 	public boolean isGoal() {
 		boolean isGoal = false;
-		
-		if(hamming() == 0){
+
+		if (hamming() == 0) {
 			isGoal = true;
 		}
-		
+
 		return isGoal;
 	}
 
-	//Swap two adjacent boards
+	// Swap two adjacent boards
 	public Board twin() {
-		
-		for(int column = 0; column < dimension; column++){
-			for(int row = 0; row < dimension; row++){
-				
-				
+		Board twin = null;
+		for (int column = 0; column < dimension; column++) {
+			for (int row = 0; row < dimension; row++) {
+				if (blocks[row][column] == 0 && blocks[row][column + 1] != 0) {
+					int nextColumn = column + 1;
+					int nextRow = row;
+
+					twin = swapBoard(row, column, nextRow, nextColumn);
 				}
 			}
-		
-		return null;
+		}
+
+		return twin;
 	}
 
 	public boolean equals(Object y) {
-		return true;
+		return Arrays.deepEquals(blocks, (int[][]) y);
 	}
 
 	public Iterable<Board> neighbors() {
-		return null;
+		LinkedList<Board> neighbors = new LinkedList<Board>();
 
+		refreshEmptyBlock();
+		
+		int emptyRow = emptyBlock[0];
+		int emptyColumn = emptyBlock[1];
+
+		if (notTopRow()) {
+			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow, emptyColumn - 1));
+		}
+
+		if (notBottomRow()) {
+			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow, emptyColumn + 1));
+		}
+
+		if (notRightColumn()) {
+			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow - 1, emptyColumn));
+		}
+
+		if (notLeftColumn()) {
+			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow + 1, emptyColumn));
+		}
+
+		return neighbors;
 	}
 
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(dimension).append("\n");
 
-		return null;
+		for (int column = 0; column < dimension; column++) {
+			for (int row = 0; row < dimension; row++) {
+				builder.append(String.format("%2d", blocks[row][column]));
+			}
+			builder.append("\n");
+		}
 
+		return builder.toString();
 	}
 
-	public static void main(String[] args) {
+	private void initializeBlocks(int[][] newBlocks) {
+		blocks = new int[dimension][dimension];
+		for (int column = 0; column < dimension; column++) {
+			for (int row = 0; row < dimension; row++) {
+				blocks[column][row] = newBlocks[column][row];
 
-	}
-
-	private void initializeBlocks(int[][] blocks) {
-		for (int i = 0; i < dimension; i++) {
-			for (int j = 0; j < dimension; j++) {
-				this.blocks[i][j] = blocks[i][j];
-
-				if (this.blocks[i][j] == 0) {
-					emptyBlock[0] = i;
-					emptyBlock[1] = j;
+				if (blocks[column][row] == 0) {
+					emptyBlock[0] = column;
+					emptyBlock[1] = row;
 				}
 			}
 		}
 	}
-	
-	private boolean isBlockInPlace(int rowIndex, int columnIndex){
-		
+
+	private boolean isBlockInPlace(int rowIndex, int columnIndex) {
+
 		boolean isInPlace = false;
-		
-		if(blocks[columnIndex][rowIndex] != 0){
-			if(blocks[columnIndex][rowIndex] != goalValue(rowIndex, columnIndex)){
-				isInPlace= true;
+
+		if (blocks[columnIndex][rowIndex] != 0) {
+			if (blocks[columnIndex][rowIndex] != goalValue(rowIndex, columnIndex)) {
+				isInPlace = true;
 			}
 		}
 		return isInPlace;
 	}
-	
-	private int goalValue(int rowIndex, int columnIndex){
-		 return columnIndex * dimension + rowIndex + 1;
+
+	private int goalValue(int rowIndex, int columnIndex) {
+		return columnIndex * dimension + rowIndex + 1;
 	}
-	
-	private int getDistance(int rowIndex, int columnIndex){
+
+	private int getDistance(int rowIndex, int columnIndex) {
 		int distance = 0;
-		
-		int firstDistance = Math.abs(columnIndex-(blocks[columnIndex][rowIndex]-1)/dimension); 
-		int secondDistance = Math.abs(rowIndex-(blocks[columnIndex][rowIndex]-1)%dimension);
-		
+
+		int firstDistance = Math.abs(columnIndex - (blocks[columnIndex][rowIndex] - 1) / dimension);
+		int secondDistance = Math.abs(rowIndex - (blocks[columnIndex][rowIndex] - 1) % dimension);
+
 		distance = firstDistance + secondDistance;
-		
+
 		return distance;
 	}
-	
-	private Board swapBoard(int rowIndex, int columnIndex){
-		int row1 = rowIndex;
-		int row2 = rowIndex;
-		
-		int column1 = columnIndex;
-		int column2 = columnIndex + 1;
-		
-		int[][] copy = copyBoard();
-		
-		return null;
+
+	private Board swapBoard(int rowIndex, int columnIndex, int nextRowIndex, int nextColumnIndex) {
+		int[][] twin = copyBoard();
+
+		int placeHolder = twin[rowIndex][columnIndex];
+
+		twin[rowIndex][columnIndex] = twin[nextRowIndex][nextColumnIndex];
+		twin[nextRowIndex][nextColumnIndex] = placeHolder;
+
+		return new Board(twin);
 	}
-	
-	private int[][] copyBoard(){
-		
+
+	private int[][] copyBoard() {
+
 		int[][] board = new int[dimension][dimension];
-		
+
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
-					board[i][j] = blocks[i][j];
+				board[i][j] = blocks[i][j];
+			}
+		}
+
+		return board;
+	}
+
+	private void refreshEmptyBlock() {
+		for (int column = 0; column < dimension; column++) {
+			for (int row = 0; row < dimension; row++) {
+				if (blocks[column][row] == 0) {
+					emptyBlock[0] = column;
+					emptyBlock[1] = row;
 				}
 			}
-		
-		return null;
+		}
 	}
+
+	private boolean notTopRow() {
+		return emptyBlock[0] > 0;
+	}
+
+	private boolean notBottomRow() {
+		return emptyBlock[0] < dimension - 1;
+	}
+
+	private boolean notRightColumn() {
+		return emptyBlock[1] > 0;
+	}
+
+	private boolean notLeftColumn() {
+		return emptyBlock[1] < dimension - 1;
+	}
+
 }
