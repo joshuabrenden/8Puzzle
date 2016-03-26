@@ -1,5 +1,7 @@
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class Board {
 
@@ -21,7 +23,8 @@ public class Board {
 		dimension = blocks.length;
 		initializeBlocks(blocks);
 	}
-
+	
+	//The length of the sides of the square game board
 	public int dimension() {
 		return dimension;
 	}
@@ -36,6 +39,7 @@ public class Board {
 	public int hamming() {
 		int count = 0;
 
+		//Iterates through the entire matrix, increments the count if the block is in place
 		for (int column = 0; column < dimension; column++) {
 			for (int row = 0; row < dimension; row++) {
 				if (isBlockInPlace(row, column)) {
@@ -56,6 +60,7 @@ public class Board {
 	public int manhattan() {
 		int count = 0;
 
+		//Iterates through the entire matrix, increments the count by the distance from the goal
 		for (int column = 0; column < dimension; column++) {
 			for (int row = 0; row < dimension; row++) {
 				count += getDistance(row, column);
@@ -65,6 +70,7 @@ public class Board {
 		return count;
 	}
 
+	//If hamming is zero, we are at our goal position.
 	public boolean isGoal() {
 		boolean isGoal = false;
 
@@ -75,12 +81,14 @@ public class Board {
 		return isGoal;
 	}
 
-	// Swap two adjacent boards
+	// Returns the game board's twin from exchanging tiles
 	public Board twin() {
 		Board twin = null;
-		for (int column = 0; column < dimension; column++) {
+		for (int column = 0; column < dimension - 1; column++) {
 			for (int row = 0; row < dimension; row++) {
-				if (blocks[row][column] == 0 && blocks[row][column + 1] != 0) {
+				
+				//if the block is not an empty space, it swaps the values.
+				if (blocks[row][column] != 0 && blocks[row][column + 1] != 0) {
 					int nextColumn = column + 1;
 					int nextRow = row;
 
@@ -92,37 +100,41 @@ public class Board {
 		return twin;
 	}
 
+	//Uses the Java.Util method for comparing two dimensional arrays.
 	public boolean equals(Object y) {
 		return Arrays.deepEquals(blocks, (int[][]) y);
 	}
 
+	//Returns all the neighboring tiles from the board.
 	public Iterable<Board> neighbors() {
-		LinkedList<Board> neighbors = new LinkedList<Board>();
+		Queue<Board> neighbors = new LinkedList<Board>();
 
+		//Ensures the emptyBlock is fully updated
 		refreshEmptyBlock();
 		
 		int emptyRow = emptyBlock[0];
 		int emptyColumn = emptyBlock[1];
 
 		if (notTopRow()) {
-			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow, emptyColumn - 1));
+			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow - 1, emptyColumn ));
 		}
 
 		if (notBottomRow()) {
-			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow, emptyColumn + 1));
+			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow + 1, emptyColumn));
 		}
 
 		if (notRightColumn()) {
-			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow - 1, emptyColumn));
+			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow, emptyColumn - 1));
 		}
 
 		if (notLeftColumn()) {
-			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow + 1, emptyColumn));
+			neighbors.add(swapBoard(emptyRow, emptyColumn, emptyRow, emptyColumn + 1));
 		}
 
 		return neighbors;
 	}
 
+	//Human readable matrix for printing results.
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(dimension).append("\n");
@@ -136,7 +148,8 @@ public class Board {
 
 		return builder.toString();
 	}
-
+	
+	//Initializes the gameboard with all of the values from the text file.
 	private void initializeBlocks(int[][] newBlocks) {
 		blocks = new int[dimension][dimension];
 		emptyBlock = new int[2];
@@ -190,6 +203,7 @@ public class Board {
 		return new Board(twin);
 	}
 
+	//Creates a copy of the game board for use during the swap
 	private int[][] copyBoard() {
 
 		int[][] board = new int[dimension][dimension];
